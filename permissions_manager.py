@@ -18,7 +18,7 @@ class PermissionsManager:
                 text = file.read()
                 permissions_string += text
         self.window = tk.Tk()
-        self.window.title("Edit Permissions")
+        self.window.title("Check/Edit Permissions")
         text = tk.Text(self.window)
         text.insert(tk.END, chars=permissions_string)
 
@@ -51,3 +51,30 @@ class PermissionsManager:
                 permissions_dict[role] = text.split("\n")
 
         return permissions_dict
+
+    def add_remove_roles(self):
+        with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "r") as file:
+            roles = ''
+            text = file.read()
+            roles += text
+        self.window = tk.Tk()
+        self.window.title("Add/Remove Roles")
+        text = tk.Text(self.window)
+        text.insert(tk.END, chars=roles)
+
+        save_button = ttk.Button(self.window, text="Save", width=20,
+                                 command=lambda: self.__save_roles(text))
+        save_button.place(x=480, y=10)
+        text.pack()
+        self.window.mainloop()
+
+    def __save_roles(self, text):
+        saved_permissions = text.get("1.0", 'end-1c').split('\n')
+        saved_permissions = [item for item in saved_permissions if item != '']
+        with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "w") as file:
+            for role in saved_permissions:
+                file.write(role + '\n')
+
+        self.window.destroy()
+        tk.messagebox.showinfo(title="Saved!",
+                               message='Roles Saved!\nYou\'ll need to restart the program to see changes.')

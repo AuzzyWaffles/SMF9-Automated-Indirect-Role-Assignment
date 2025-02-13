@@ -3,8 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import TimeoutException
-from tkinter import messagebox
 import time
 import sys
 import os
@@ -47,13 +45,8 @@ def get_scheduled_associates(shift, date):
     driver.find_element(By.XPATH, '//*[@id="verify_btn"]').click()
     wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
 
-    # Find and click the date entry element
-    try:
-        wait_short.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
-    except TimeoutException:
-        driver.close()
-        messagebox.showinfo(title="Error", message='Scheduling Site took too long to load, please try again.')
-        return False
+    # Wait for the date entry element to load in
+    wait_short.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
 
     # Enter the date that was entered by the user, have to do it twice
     for _ in range(2):
@@ -71,13 +64,7 @@ def get_scheduled_associates(shift, date):
         driver.find_element(By.XPATH, '//*[@id="schedule-timeline-current-week-text"]').click()
 
     # Find and click the relevant shift based on current datetime values
-    try:
-        wait_short.until(ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
-    except TimeoutException:
-        driver.close()
-        messagebox.showinfo(title="Error", message='Scheduling Site took too long to load, please try again.')
-        return False
-
+    wait_short.until(ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
     driver.find_element(By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}').click()
 
     # Scroll to the top of the screen

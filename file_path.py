@@ -11,7 +11,7 @@ class FilePath:
         if getattr(sys, 'frozen', False):
             temp_path = sys._MEIPASS
             temp_path = os.path.join(temp_path, 'permissions\\', filename)
-            base_path = f'C:\\Users\\{self.current_user}\\.config\\SMF9 Automated Indirect Role Assignment\\'
+            base_path = f'C:\\Users\\{self.current_user}\\.config\\Koality Rotation\\'
 
             # If base path doesn't on user's PC, make it
             if not os.path.exists(base_path):

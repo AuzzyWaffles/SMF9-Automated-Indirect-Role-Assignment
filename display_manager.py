@@ -10,12 +10,6 @@ from schedule_finder import get_scheduled_associates
 from assignment_manager import AssignmentManager
 
 
-def info_button_click():
-    messagebox.showinfo(title="Info", message='Please input the date in the following format: MM-DD-YYYY\n\n'
-                                              'Also, please be aware that if you type a date past tomorrow, '
-                                              'the compliance tracker will not be considered when assigning AAs.')
-
-
 class DisplayManager:
     def __init__(self):
         # Get current datetime
@@ -31,11 +25,11 @@ class DisplayManager:
 
         # Create Main Menu
         self.window = tk.Tk()
-        self.window.title('SMF9 Automated Indirect Role Assignment')
-        self.canvas = tk.Canvas(width=500, height=500, bg='#1399FF')
+        self.window.title('Koality Rotation')
+        self.canvas = tk.Canvas(width=1000, height=1000, bg='#1399FF')
 
         self.text = self.canvas.create_text(260, 60,
-                                            text='Welcome to the Automated Indirect Role Assignment App!\n\nOnce the '
+                                            text='Thanks for using Koality Rotation!\n\nOnce the '
                                                  'browser opens you will need to log in through Midway.\n\nAfter '
                                                  'logging in please don\'t click anything, the app will handle all '
                                                  'browser activity.\n\nPlease fill out the entries below then click '
@@ -98,7 +92,12 @@ class DisplayManager:
         self.generate_button = ttk.Button(text="Generate", width=35, command=self.generate_button_click)
         self.permissions_button = ttk.Button(text="Check/Edit Permissions", width=35,
                                              command=self.permissions_button_click)
-        self.info_button = tk.Button(text='i', command=info_button_click)
+        self.info_button = tk.Button(text='i', command=lambda: messagebox.showinfo(title="Info", message='Please '
+                                                                                                         'input the '
+                                                                                                         'date in the '
+                                                                                                         'following '
+                                                                                                         'format: '
+                                                                                                         'MM-DD-YYYY'))
 
         self.canvas.create_window(350, 235, window=self.generate_button)
         self.canvas.create_window(350, 420, window=self.permissions_button)
@@ -126,7 +125,7 @@ class DisplayManager:
             if (int(self.eol_entry.get()) < 0 or int(self.ps_entry.get()) < 0 or
                     int(self.ws_entry.get()) < 0 or int(self.dt_entry.get()) < 0 or
                     int(self.refurb_entry.get()) < 0 or int(self.unload_entry.get()) < 0):
-                messagebox.showinfo(title="Error", message="All entries must contain valid integers.")
+                messagebox.showinfo(title="Error", message="All role entries must contain valid integers.")
                 return
         except ValueError:
             messagebox.showinfo(title="Error", message="All role entries must contain valid integers.")
@@ -142,19 +141,15 @@ class DisplayManager:
         try:
             date = dt.datetime(int(date[6:]), int(date[0:2]), int(date[3:5]))
             today = dt.datetime(int(self.year), int(self.month), int(self.day_number))
-            tomorrow = today + dt.timedelta(days=1)
         except ValueError:
             messagebox.showinfo(title="Error", message="Invalid date entry.\n\nPlease ensure you typed the correct date"
                                                        " and it's formatted as follows: MM/DD/YYYY")
             return
 
-        if not messagebox.askyesno(title="Proceed?", message='Please make sure you have the original processing '
-                                                             'compliance file on your desktop (not a shortcut file) '
-                                                             'and the file\'s last pull reflects today\'s '
-                                                             'date.\n\nWould you like to proceed?'):
+        if not messagebox.askyesno(title="Proceed?", message='Are you sure you would like to proceed?'):
             return
 
-        # If pulling for today or tonorrow, use object method to find uncompliant processors
+        # If pulling for today or tomorrow, use object method to find uncompliant processors
         # if date == today or date == tomorrow:
         if date == 'DISABLING_UNCOMPLIANT_FINDER':  # uncomment above comment to re-enable
             try:
