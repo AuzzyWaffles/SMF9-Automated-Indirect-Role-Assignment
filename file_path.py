@@ -10,7 +10,7 @@ class FilePath:
         # If the application is frozen (running as a standalone executable)
         if getattr(sys, 'frozen', False):
             temp_path = sys._MEIPASS
-            temp_path = os.path.join(temp_path, 'permissions\\', filename)
+            temp_path = os.path.join(temp_path, 'txt\\', filename)
             base_path = f'C:\\Users\\{self.current_user}\\.config\\Koality Rotation\\'
 
             # If base path doesn't on user's PC, make it
@@ -29,4 +29,4 @@ class FilePath:
         else:
             # If running in a normal Python environment
             base_path = os.path.dirname(__file__)
-            return os.path.join(base_path, 'permissions', filename)
+            return os.path.join(base_path, 'txt', filename)

@@ -17,8 +17,11 @@ class DisplayManager:
         self.file_path = FilePath()
 
         # Get site name:
-        with open(self.file_path.get_persistent_storage_path(f'site.txt'), "r") as file:
+        with open(self.file_path.get_persistent_storage_path('site.txt'), "r") as file:
             self.site = file.read().upper()
+
+        with open(self.file_path.get_persistent_storage_path('saved_shifts.txt'), 'r') as file:
+            self.shifts = [shift[:-1] for shift in file.readlines()]
 
         # Get current datetime
         self.current_time = dt.datetime.now()
@@ -62,7 +65,7 @@ class DisplayManager:
         self.canvas.create_line(0, 120, 500, 120, fill="black", width=2)
 
         self.dropdown_text = self.canvas.create_text(75, 135, text='Select a Shift:', font=("Helvetica", 12, "bold"))
-        self.dropdown_widget = ttk.Combobox(self.window, values=['None'])
+        self.dropdown_widget = ttk.Combobox(self.window, values=self.shifts)
         self.canvas.create_window(250, 135, window=self.dropdown_widget)
 
         self.site_text = self.canvas.create_text(435, 135, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
@@ -79,11 +82,13 @@ class DisplayManager:
         style.configure('TButton', padding=(0, 35, 0, 32), font=('Helvetica', 10))
 
         self.change_site_button = tk.Button(text="Change Site", width=10, command=self.change_site)
+        self.change_shifts_button = tk.Button(text='Change Shifts', width=10, command=self.change_shifts)
         self.generate_button = ttk.Button(text="Generate", width=35, command=self.generate_button_click)
         self.permissions_button = ttk.Button(text="Check/Edit Permissions", width=35,
-                                             command=lambda: self.pm.check_permissions())
+                                             command=self.pm.check_permissions)
 
         self.canvas.create_window(435, 167, window=self.change_site_button)
+        self.canvas.create_window(435, 200, window=self.change_shifts_button)
         self.canvas.create_window(250, 235, window=self.generate_button)
         self.canvas.create_window(250, 420, window=self.permissions_button)
 
@@ -103,8 +108,7 @@ class DisplayManager:
 
     def generate_roles(self):
         with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "r") as file:
-            self.lines = file.readlines()
-            self.lines = [line.strip() for line in self.lines]
+            self.lines = [line.strip() for line in file.readlines()]
             curr_y = 500
 
             for line in self.lines:
@@ -120,39 +124,61 @@ class DisplayManager:
         self.canvas.mainloop()
 
     def change_site(self):
-        self.site = simpledialog.askstring('Change Site', 'Please enter your site:').upper()
-        with open(self.file_path.get_persistent_storage_path(f'site.txt'), "w") as file:
-            file.write(self.site)
-        self.canvas.delete(self.site_text)
-        self.site_text = self.canvas.create_text(435, 135, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
+        self.site = simpledialog.askstring('Change Site', 'Please enter your site:')
+        if self.site:
+            self.site = self.site.upper()
+            with open(self.file_path.get_persistent_storage_path(f'site.txt'), "w") as file:
+                file.write(self.site)
+            self.canvas.delete(self.site_text)
+            self.site_text = self.canvas.create_text(435, 135, text=f'Site: {self.site}',
+                                                     font=("Helvetica", 12, "bold"))
+
+    def change_shifts(self):
+        messagebox.showinfo(title="Shifts Input", message="Please ensure all shifts are entered as follows:\nHH-MM-00")
+        with open(self.file_path.get_persistent_storage_path('saved_shifts.txt'), 'r') as file:
+            shifts = ''
+            text = file.read()
+            shifts += text
+            self.text_window = tk.Tk()
+            self.text_window.title('Change Shifts')
+            text = tk.Text(self.text_window)
+            text.insert(tk.END, chars=shifts)
+
+            save_button = ttk.Button(self.text_window, text="Save", width=20,
+                                     command=lambda: self.__save(text, 'saved_shifts.txt'))
+            save_button.place(x=480, y=10)
+            text.pack()
+            self.text_window.mainloop()
 
     def add_remove_roles(self):
         with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "r") as file:
             roles = ''
             text = file.read()
             roles += text
+
         self.text_window = tk.Tk()
         self.text_window.title("Add/Remove Roles")
         text = tk.Text(self.text_window)
         text.insert(tk.END, chars=roles)
 
         save_button = ttk.Button(self.text_window, text="Save", width=20,
-                                 command=lambda: self.__save_roles(text))
+                                 command=lambda: self.__save(text, 'saved_roles.txt'))
         save_button.place(x=480, y=10)
         text.pack()
         self.text_window.mainloop()
 
-    def __save_roles(self, text):
-        saved_permissions = text.get("1.0", 'end-1c').split('\n')
-        saved_permissions = [item for item in saved_permissions if item != '']
-        with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "w") as file:
-            for role in saved_permissions:
+    def __save(self, text, txt):
+        saved_text = text.get("1.0", 'end-1c').split('\n')
+        saved_text = [item for item in saved_text if item != '']
+        with open(self.file_path.get_persistent_storage_path(txt), "w") as file:
+            for role in saved_text:
                 file.write(role + '\n')
 
         self.text_window.destroy()
-        self.window.destroy()
         tk.messagebox.showinfo(title="Saved!",
-                               message='Roles Saved!')
+                               message='Saved!')
+
+        self.window.destroy()
         DisplayManager()
 
     def generate_button_click(self):
@@ -166,7 +192,7 @@ class DisplayManager:
             return
 
         shift = self.dropdown_widget.get()
-        if shift not in self.dropdown_options:
+        if shift not in self.shifts:
             messagebox.showinfo(title="Error", message="Please select a valid shift from the dropdown menu.")
             return
 
@@ -196,7 +222,7 @@ class DisplayManager:
             DisplayManager()
             return
 
-        # Use PermissionsManager method to get permissions for each indirect role
+        # Use PermissionsManager method to get txt for each indirect role
         permissions_dict = self.pm.get_permissions()
 
         # Create final class object

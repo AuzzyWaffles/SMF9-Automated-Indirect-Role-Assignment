@@ -3,7 +3,7 @@
 .venv/
 /build/
 /dist/
-/permissions/
+/txt/
 /__pycache__/
 export.txt
 main.spec

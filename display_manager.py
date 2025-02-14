@@ -177,7 +177,7 @@ class DisplayManager:
             DisplayManager()
             return
 
-        # Use PermissionsManager method to get permissions for each indirect role
+        # Use PermissionsManager method to get txt for each indirect role
         permissions_dict = self.pm.get_permissions()
 
         # Create final class object
