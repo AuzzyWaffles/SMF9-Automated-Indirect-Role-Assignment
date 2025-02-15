@@ -3,8 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import simpledialog
 import datetime as dt
-import sys
 import os
+import sys
 from file_path import FilePath
 from permissions_manager import PermissionsManager
 from uncompliant_finder import UncompliantFinder
@@ -55,25 +55,19 @@ class DisplayManager:
         # Update the scrollable region after content is added
         self.canvas.bind("<Configure>", lambda event, canvas=self.canvas: self.on_frame_configure())
         self.text = self.canvas.create_text(260, 60,
-                                            text='Thanks for using Koality Rotation!\n\nOnce the '
-                                                 'browser opens you will need to log in through Midway.\n\nAfter '
-                                                 'logging in please don\'t click anything, the app will handle all '
-                                                 'browser activity.\n\nPlease fill out the entries below then click '
-                                                 'the \'Generate\' button to begin!',
-                                            font=("Helvetica", 9, "bold"))
+                                            text='Koality Rotation',
+                                            font=("Helvetica", 20, "bold"))
 
-        self.canvas.create_line(0, 120, 500, 120, fill="black", width=2)
-
-        self.dropdown_text = self.canvas.create_text(75, 135, text='Select a Shift:', font=("Helvetica", 12, "bold"))
+        self.dropdown_text = self.canvas.create_text(75, 100, text='Select a Shift:', font=("Helvetica", 12, "bold"))
         self.dropdown_widget = ttk.Combobox(self.window, values=self.shifts)
-        self.canvas.create_window(250, 135, window=self.dropdown_widget)
+        self.canvas.create_window(250, 100, window=self.dropdown_widget)
 
-        self.site_text = self.canvas.create_text(435, 135, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
+        self.site_text = self.canvas.create_text(435, 100, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
 
-        self.date_text = self.canvas.create_text(73, 167, text='Type a Date:', font=("Helvetica", 12, "bold"))
+        self.date_text = self.canvas.create_text(73, 132, text='Type a Date:', font=("Helvetica", 12, "bold"))
         self.date_entry = ttk.Entry(width=23)
         self.date_entry.insert(0, string=f'{self.month}-{self.day_number}-{self.year}')
-        self.canvas.create_window(250, 167, window=self.date_entry)
+        self.canvas.create_window(250, 132, window=self.date_entry)
 
         # Create a style for ttk.Button
         style = ttk.Style()
@@ -87,16 +81,30 @@ class DisplayManager:
         self.permissions_button = ttk.Button(text="Check/Edit Permissions", width=35,
                                              command=self.pm.check_permissions)
 
-        self.canvas.create_window(435, 167, window=self.change_site_button)
-        self.canvas.create_window(435, 200, window=self.change_shifts_button)
-        self.canvas.create_window(250, 235, window=self.generate_button)
-        self.canvas.create_window(250, 420, window=self.permissions_button)
+        self.canvas.create_window(435, 132, window=self.change_site_button)
+        self.canvas.create_window(435, 165, window=self.change_shifts_button)
+        self.canvas.create_window(250, 200, window=self.generate_button)
+        self.canvas.create_window(250, 385, window=self.permissions_button)
 
-        self.canvas.create_line(0, 480, 500, 480, fill="black", width=2)
+        self.canvas.create_line(0, 445, 500, 445, fill="black", width=2)
 
         self.add_remove_button = tk.Button(text='Add/Remove Roles',
                                            command=self.add_remove_roles)
-        self.canvas.create_window(410, 500, window=self.add_remove_button)
+        self.canvas.create_window(410, 465, window=self.add_remove_button)
+
+        # Determine the path to the bundled executable or script
+        if getattr(sys, 'frozen', False):
+            # If the application is frozen (e.g., as a single .exe file)
+            bundle_dir = sys._MEIPASS  # PyInstaller creates this variable
+        else:
+            # If the application is not frozen (running as a script)
+            bundle_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the path to image1.png
+        image_path = os.path.join(bundle_dir, 'images', 'image1.png')
+
+        self.smile_image1 = tk.PhotoImage(file=image_path)
+        self.canvas.create_image(250, 285, image=self.smile_image1, tag='image1')
 
         self.entry_dict = {}
 
@@ -109,7 +117,7 @@ class DisplayManager:
     def generate_roles(self):
         with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "r") as file:
             self.lines = [line.strip() for line in file.readlines()]
-            curr_y = 500
+            curr_y = 465
 
             for line in self.lines:
                 self.canvas.create_text(200, curr_y, text=f'{line.upper()}:', font=("Helvetica", 12, "bold"))
@@ -130,7 +138,7 @@ class DisplayManager:
             with open(self.file_path.get_persistent_storage_path(f'site.txt'), "w") as file:
                 file.write(self.site)
             self.canvas.delete(self.site_text)
-            self.site_text = self.canvas.create_text(435, 135, text=f'Site: {self.site}',
+            self.site_text = self.canvas.create_text(435, 100, text=f'Site: {self.site}',
                                                      font=("Helvetica", 12, "bold"))
 
     def change_shifts(self):
@@ -200,7 +208,6 @@ class DisplayManager:
 
         try:
             date = dt.datetime(int(date[6:]), int(date[0:2]), int(date[3:5]))
-            today = dt.datetime(int(self.year), int(self.month), int(self.day_number))
         except ValueError:
             messagebox.showinfo(title="Error", message="Invalid date entry.\n\nPlease ensure you typed the correct date"
                                                        " and it's formatted as follows: MM/DD/YYYY")
@@ -210,12 +217,12 @@ class DisplayManager:
             return
 
         # Create dictionary saving number of AAs per indirect role
-        nums_dict = {line: self.entry_dict[f'{line}_entry'].get() for line in self.lines}
+        nums_dict = {line: int(self.entry_dict[f'{line}_entry'].get()) for line in self.lines}
 
         self.window.destroy()
 
         # Use imported function to find scheduled associates
-        scheduled_associates = get_scheduled_associates(shift, date)
+        scheduled_associates = get_scheduled_associates(self.site, shift, date)
 
         # If Scheduling Site takes too long to load and returns False
         if not scheduled_associates:
@@ -225,14 +232,15 @@ class DisplayManager:
         # Use PermissionsManager method to get txt for each indirect role
         permissions_dict = self.pm.get_permissions()
 
-        # Create final class object
-        am = AssignmentManager(permissions_dict, nums_dict, [], scheduled_associates)
-        result_string, uncompliant_string, not_enough_string = am.assign_indirects()
-        if len(not_enough_string) > 0:
-            final_string = not_enough_string + '\n' + result_string + '\n' + uncompliant_string
+        # Create final class object, create final string
+        am = AssignmentManager(permissions_dict, nums_dict, scheduled_associates)
+        result_string, not_enough_string = am.assign_indirects()
+        if not_enough_string:
+            final_string = not_enough_string + '\n' + result_string
         else:
-            final_string = result_string + '\n' + uncompliant_string
+            final_string = result_string
 
+        # Place the final string in the text boxx
         self.window = tk.Tk()
         self.window.title('Results')
         text = tk.Text(self.window)
@@ -249,6 +257,3 @@ class DisplayManager:
     def main_menu_button_click(self):
         self.window.destroy()
         DisplayManager()
-
-
-DisplayManager()

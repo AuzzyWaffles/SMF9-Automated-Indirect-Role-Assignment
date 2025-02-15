@@ -8,17 +8,7 @@ import sys
 import os
 
 
-def get_scheduled_associates(shift, date):
-
-    if shift == 'MOR':
-        shift = '04-00-00'
-    elif shift == 'DAY':
-        shift = '09-30-00'
-    elif shift == 'TWI':
-        shift = '15-00-00'
-    else:
-        shift = '20-30-00'
-
+def get_scheduled_associates(site, shift, date):
     year = date.strftime('%Y')
     day_of_week = date.strftime('%a')
     month_num = date.month
@@ -37,15 +27,10 @@ def get_scheduled_associates(shift, date):
     wait_short = WebDriverWait(driver, 20)
 
     # Go to Scheduling Site
-    driver.get(os.getenv('SCHEDULING_SITE'))
+    driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
 
-    # Log into Midway
-    driver.find_element(By.XPATH, '//*[@id="user_name"]').send_keys(os.getenv('USERNAME'))
-    driver.find_element(By.XPATH, '//*[@id="password"]').send_keys(os.getenv('MIDWAY_PASSWORD'))
-    driver.find_element(By.XPATH, '//*[@id="verify_btn"]').click()
+    # Wait for the site to load in while user logs in through Midway authentication
     wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
-
-    # Wait for the date entry element to load in
     wait_short.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
 
     # Enter the date that was entered by the user, have to do it twice
