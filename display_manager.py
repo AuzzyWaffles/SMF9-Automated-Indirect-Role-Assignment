@@ -14,23 +14,25 @@ from assignment_manager import AssignmentManager
 
 class DisplayManager:
     def __init__(self):
+        # Determine whether the app is frozen or running on Pycharm to find app files
         self.file_path = FilePath()
 
         # Get site name:
         with open(self.file_path.get_persistent_storage_path('site.txt'), "r") as file:
             self.site = file.read().upper()
 
+        # Get saved shifts
         with open(self.file_path.get_persistent_storage_path('saved_shifts.txt'), 'r') as file:
             self.shifts = [shift[:-1] for shift in file.readlines()]
 
-        # Get current datetime
+        # Get current year, month, day number, hour
         self.current_time = dt.datetime.now()
         self.year = self.current_time.strftime('%Y')
         self.month = self.current_time.strftime('%m')
         self.day_number = self.current_time.strftime('%d')
         self.hour = self.current_time.strftime('%H')
 
-        # Setup other classes
+        # Create instances of Permissions Manager, Uncompliant Finder
         self.pm = PermissionsManager()
         self.uf = UncompliantFinder()
 
@@ -38,14 +40,14 @@ class DisplayManager:
         self.window = tk.Tk()
         self.window.title('Koality Rotation')
 
-        # Create a frame to hold the canvas and the scrollbar
+        # Create and set a frame to hold the canvas and the scrollbar
         frame = tk.Frame(self.window)
         frame.pack(fill="both", expand=True)
 
         # Create canvas inside the frame
         self.canvas = tk.Canvas(frame, width=500, height=600, bg='#1399FF')
 
-        # Add a vertical scrollbar
+        # Create and set a vertical scrollbar
         scrollbar = tk.Scrollbar(frame, orient="vertical", command=self.canvas.yview)
         scrollbar.pack(side="right", fill="y")
 
@@ -54,60 +56,65 @@ class DisplayManager:
 
         # Update the scrollable region after content is added
         self.canvas.bind("<Configure>", lambda event, canvas=self.canvas: self.on_frame_configure())
+
+        # Create and set main menu header
         self.text = self.canvas.create_text(260, 60,
                                             text='Koality Rotation',
                                             font=("Helvetica", 20, "bold"))
 
+        # Create and set dropdown menu
         self.dropdown_text = self.canvas.create_text(75, 100, text='Select a Shift:', font=("Helvetica", 12, "bold"))
         self.dropdown_widget = ttk.Combobox(self.window, values=self.shifts)
         self.canvas.create_window(250, 100, window=self.dropdown_widget)
 
+        # Create and set site text
         self.site_text = self.canvas.create_text(435, 100, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
 
+        # Create and set date entry
         self.date_text = self.canvas.create_text(73, 132, text='Type a Date:', font=("Helvetica", 12, "bold"))
         self.date_entry = ttk.Entry(width=23)
         self.date_entry.insert(0, string=f'{self.month}-{self.day_number}-{self.year}')
         self.canvas.create_window(250, 132, window=self.date_entry)
 
-        # Create a style for ttk.Button
+        # Create and configure a style for ttk.Button, increase padding and font size
         style = ttk.Style()
-
-        # Configure the button style to increase padding and font size
         style.configure('TButton', padding=(0, 35, 0, 32), font=('Helvetica', 10))
 
+        # Create buttons
         self.change_site_button = tk.Button(text="Change Site", width=10, command=self.change_site)
         self.change_shifts_button = tk.Button(text='Change Shifts', width=10, command=self.change_shifts)
         self.generate_button = ttk.Button(text="Generate", width=35, command=self.generate_button_click)
         self.permissions_button = ttk.Button(text="Check/Edit Permissions", width=35,
                                              command=self.pm.check_permissions)
+        self.add_remove_button = tk.Button(text='Add/Remove Roles',
+                                           command=self.add_remove_roles)
 
+        # Set buttons
         self.canvas.create_window(435, 132, window=self.change_site_button)
         self.canvas.create_window(435, 165, window=self.change_shifts_button)
         self.canvas.create_window(250, 200, window=self.generate_button)
         self.canvas.create_window(250, 385, window=self.permissions_button)
-
-        self.canvas.create_line(0, 445, 500, 445, fill="black", width=2)
-
-        self.add_remove_button = tk.Button(text='Add/Remove Roles',
-                                           command=self.add_remove_roles)
         self.canvas.create_window(410, 465, window=self.add_remove_button)
 
-        # Determine the path to the bundled executable or script
+        # Create and set horizontal line
+        self.canvas.create_line(0, 445, 500, 445, fill="black", width=2)
+
+        # Determine the path to the Amazon smile logo
         if getattr(sys, 'frozen', False):
             # If the application is frozen (e.g., as a single .exe file)
-            bundle_dir = sys._MEIPASS  # PyInstaller creates this variable
+            bundle_dir = sys._MEIPASS
         else:
-            # If the application is not frozen (running as a script)
+            # If the application is not frozen (running in Pycharm)
             bundle_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # Construct the path to image1.png
+        # Construct the path to the Amazon smile logo
         image_path = os.path.join(bundle_dir, 'images', 'image1.png')
 
+        # Create and set Amazon smile logo
         self.smile_image1 = tk.PhotoImage(file=image_path)
         self.canvas.create_image(250, 285, image=self.smile_image1, tag='image1')
 
-        self.entry_dict = {}
-
+        # Create and set saved roles
         self.generate_roles()
 
     def on_frame_configure(self):
@@ -115,10 +122,13 @@ class DisplayManager:
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def generate_roles(self):
+        # Get saved roles
         with open(self.file_path.get_persistent_storage_path(f'saved_roles.txt'), "r") as file:
             self.lines = [line.strip() for line in file.readlines()]
             curr_y = 465
 
+            # Create and set saved roles and entrys
+            self.entry_dict = {}
             for line in self.lines:
                 self.canvas.create_text(200, curr_y, text=f'{line.upper()}:', font=("Helvetica", 12, "bold"))
 
@@ -128,6 +138,7 @@ class DisplayManager:
 
                 curr_y += 50
 
+        # Start the main loop
         self.canvas.pack()
         self.canvas.mainloop()
 
@@ -240,20 +251,8 @@ class DisplayManager:
         else:
             final_string = result_string
 
-        # Place the final string in the text boxx
-        self.window = tk.Tk()
-        self.window.title('Results')
-        text = tk.Text(self.window)
-        text.insert(tk.END, chars=final_string)
-        save_button = tk.Button(self.window, text="Main Menu", width=20, height=4,
-                                command=self.main_menu_button_click)
-        save_button.place(x=480, y=10)
-        text.pack()
-        self.window.mainloop()
-
-    def permissions_button_click(self):
-        self.pm.check_permissions()
-
-    def main_menu_button_click(self):
-        self.window.destroy()
+        # Place the results in a messagebox
+        if not messagebox.askyesno(title="Results", message=f'{final_string}\n Would you like to go back to the Main '
+                                                            f'Menu?'):
+            return
         DisplayManager()

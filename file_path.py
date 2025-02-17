@@ -13,7 +13,7 @@ class FilePath:
             temp_path = os.path.join(temp_path, 'txt\\', filename)
             base_path = f'C:\\Users\\{self.current_user}\\.config\\Koality Rotation\\'
 
-            # If base path doesn't on user's PC, make it
+            # If base path isn't on user's PC, make it
             if not os.path.exists(base_path):
                 os.makedirs(base_path)
 
