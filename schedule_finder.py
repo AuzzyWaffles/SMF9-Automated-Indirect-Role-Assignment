@@ -6,6 +6,20 @@ from selenium.webdriver.support import expected_conditions as ec
 import time
 import sys
 import os
+import asyncio
+from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import InvalidSessionIdException
+from tkinter import messagebox
+
+
+async def my_function(webdriver):
+    # If the browser title is available after 20 seconds then there's a problem, close it
+    await asyncio.sleep(20)
+    try:
+        webdriver.title
+        webdriver.close()
+    except WebDriverException:
+        pass
 
 
 def get_scheduled_associates(site, shift, date):
@@ -24,71 +38,79 @@ def get_scheduled_associates(site, shift, date):
 
     timeout = sys.maxsize
     wait = WebDriverWait(driver, timeout)
-    wait_short = WebDriverWait(driver, 20)
 
-    # Go to Scheduling Site
-    driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
+    try:
+        # Go to Scheduling Site
+        driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
 
-    # Wait for the site to load in while user logs in through Midway authentication
-    wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
-    wait_short.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
+        # Wait for the site to load in while user logs in through Midway authentication
+        wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
 
-    # Enter the date that was entered by the user, have to do it twice
-    for _ in range(2):
-        date_entry = driver.find_element(By.XPATH, '//*[@id="date-picker"]')
-        date_entry.send_keys(month_num)
-        if month_num == 1:
-            date_entry.send_keys(Keys.TAB)
+        # Start timing how long the browser is open for
+        asyncio.run(my_function(driver))
 
-        date_entry.send_keys(day)
-        if day <= 3:
-            date_entry.send_keys(Keys.TAB)
+        # Enter the date that was entered by the user, have to do it twice
+        wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
+        for _ in range(2):
+            date_entry = driver.find_element(By.XPATH, '//*[@id="date-picker"]')
+            date_entry.send_keys(month_num)
+            if month_num == 1:
+                date_entry.send_keys(Keys.TAB)
 
-        date_entry.send_keys(year)
+            date_entry.send_keys(day)
+            if day <= 3:
+                date_entry.send_keys(Keys.TAB)
 
-        driver.find_element(By.XPATH, '//*[@id="schedule-timeline-current-week-text"]').click()
+            date_entry.send_keys(year)
 
-    # Find and click the relevant shift based on current datetime values
-    wait_short.until(ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
-    driver.find_element(By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}').click()
+            driver.find_element(By.XPATH, '//*[@id="schedule-timeline-current-week-text"]').click()
 
-    # Scroll to the top of the screen
-    driver.execute_script("window.scrollTo(0, 0);")
+        # Find and click the relevant shift based on current datetime values
+        wait.until(
+            ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
+        driver.find_element(By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}').click()
 
-    # Find, scroll, and click the 'Select display attribute' button
-    wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
-    attribute_button = driver.find_element(By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')
-    driver.execute_script("arguments[0].scrollIntoView(true);", attribute_button)
-    attribute_button.click()
+        # Scroll to the top of the screen
+        driver.execute_script("window.scrollTo(0, 0);")
 
-    # Uncheck boxes on attribute list
-    wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[1]/input')))
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[1]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[4]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[6]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[7]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[8]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[10]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[11]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[12]/input').click()
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[13]/input').click()
+        # Find, scroll, and click the 'Select display attribute' button
+        wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
+        attribute_button = driver.find_element(By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')
+        driver.execute_script("arguments[0].scrollIntoView(true);", attribute_button)
+        attribute_button.click()
 
-    # Click submit button
-    driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox-modal-submit-button"]').click()
-    time.sleep(1)
+        # Uncheck boxes on attribute list
+        wait.until(
+            ec.visibility_of_element_located((By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[1]/input')))
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[1]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[4]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[6]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[7]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[8]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[10]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[11]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[12]/input').click()
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[13]/input').click()
 
-    # Get logins and add to logins dictionary
-    elements = driver.find_elements(By.CSS_SELECTOR, 'tbody tr td')
-    logins = set()
-    for element in elements:
-        if element.text != '':
-            logins.add(element.text)
-        else:
-            break
+        # Click submit button
+        driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox-modal-submit-button"]').click()
+        time.sleep(1)
 
-    if shift == '20-30-00' and (day_of_week == 'Thu' or day_of_week == 'Fri' or day_of_week == 'Sat'):
-        logins.add(os.getenv('EXCEPTION_AA'))
+        # Get logins and add to logins dictionary
+        elements = driver.find_elements(By.CSS_SELECTOR, 'tbody tr td')
+        logins = set()
+        for element in elements:
+            if element.text != '':
+                logins.add(element.text)
+            else:
+                break
 
-    driver.close()
+        if shift == '20-30-00' and (day_of_week == 'Thu' or day_of_week == 'Fri' or day_of_week == 'Sat'):
+            logins.add(os.getenv('EXCEPTION_AA'))
 
-    return logins
+        driver.close()
+
+        return logins
+
+    except InvalidSessionIdException:
+        return None

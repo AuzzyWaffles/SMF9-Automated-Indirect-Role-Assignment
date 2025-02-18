@@ -237,6 +237,7 @@ class DisplayManager:
 
         # If Scheduling Site takes too long to load and returns False
         if not scheduled_associates:
+            messagebox.showinfo(title='Timeout', message='SSPOT took too long to load, please try again.')
             DisplayManager()
             return
 
