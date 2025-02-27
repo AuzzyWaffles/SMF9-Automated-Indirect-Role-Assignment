@@ -1,22 +1,26 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+import file_path
 
 
 def change_site(display):
     """Opens entry box to allow user to change site ID"""
-    display.site = simpledialog.askstring('Change Site', 'Please enter your site:').upper()
-    if display.site:
-        with open(display.file_path.get_txt(f'site.txt'), "w") as file:
-            file.write(display.site)
-        display.canvas.delete(display.site_text)
-        display.site_text = display.canvas.create_text(435, 100, text=f'Site: {display.site}',
-                                                 font=("Helvetica", 12, "bold"))
+    try:
+        display.site = simpledialog.askstring('Change Site', 'Please enter your site:').upper()
+        if display.site:
+            with open(file_path.get_txt(f'site.txt'), "w") as file:
+                file.write(display.site)
+            display.canvas.delete(display.site_text)
+            display.site_text = display.canvas.create_text(435, 100, text=f'Site: {display.site}',
+                                                           font=("Helvetica", 12, "bold"))
+    except AttributeError:
+        pass
 
 
 def change_shifts(display):
     """Opens text box to allow user to change shift start times"""
     messagebox.showinfo(title="Shifts Input", message="Please ensure all shifts are entered as follows:\nHH-MM-00")
-    with open(display.file_path.get_txt('saved_shifts.txt'), 'r') as file:
+    with open(file_path.get_txt('saved_shifts.txt'), 'r') as file:
         shifts = ''
         text = file.read()
         shifts += text
@@ -43,7 +47,7 @@ def change_shifts(display):
 
 def add_remove_roles(display):
     """Opens text box to allow user to add/remove roles"""
-    with open(display.file_path.get_txt(f'saved_roles.txt'), "r") as file:
+    with open(file_path.get_txt(f'saved_roles.txt'), "r") as file:
         roles = ''
         text = file.read()
         roles += text
@@ -73,7 +77,7 @@ def __save(display, text, txt):
     """Saves content in Add/Remove Roles text box"""
     saved_text = text.get("1.0", 'end-1c').split('\n')
     saved_text = [item for item in saved_text if item != '']
-    with open(display.file_path.get_txt(txt), "w") as file:
+    with open(file_path.get_txt(txt), "w") as file:
         for role in saved_text:
             file.write(role + '\n')
 

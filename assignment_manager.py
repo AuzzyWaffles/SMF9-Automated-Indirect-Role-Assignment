@@ -27,14 +27,14 @@ class AssignmentManager:
                         try:
                             choice = random.choice(trained_associates)
                         except IndexError:
-                            self.not_enough_string += f'Not enough eligible AAs to fill {key.upper()}.\n'
+                            self.not_enough_string += f'Not enough eligible AAs to fill {key}.\n'
                             empty = True
                             break
                         if choice not in self.scheduled_associates:
                             pass
                         elif choice not in self.chosen_associates:
                             self.chosen_associates.add(choice)
-                            self.result_string += f'{key.upper()}: {choice}\n'
+                            self.result_string += f'{key}: {choice}\n'
                             found = True
                         trained_associates.remove(choice)
 

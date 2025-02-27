@@ -47,6 +47,7 @@ class DisplayManager:
 
         self.dropdown_text = self.canvas.create_text(75, 100, text='Select a Shift:', font=("Helvetica", 12, "bold"))
         self.dropdown_widget = ttk.Combobox(self.window, values=self.shifts)
+        self.dropdown_widget.set("Select an option")
         self.canvas.create_window(250, 100, window=self.dropdown_widget)
 
         self.site_text = self.canvas.create_text(435, 100, text=f'Site: {self.site}', font=("Helvetica", 12, "bold"))
@@ -100,7 +101,7 @@ class DisplayManager:
 
             self.entry_dict = {}
             for line in self.lines:
-                self.canvas.create_text(200, curr_y, text=f'{line.upper()}:', font=("Helvetica", 12, "bold"))
+                self.canvas.create_text(200, curr_y, text=f'{line}:', font=("Helvetica", 12, "bold"))
 
                 self.entry_dict[f'{line}_entry'] = ttk.Entry(width=2)
                 self.entry_dict[f'{line}_entry'].insert(tk.END, string="0")
@@ -112,13 +113,28 @@ class DisplayManager:
         self.canvas.mainloop()
 
     def generate_button_click(self):
+        all_zero = True
         try:
             for line in self.lines:
-                if (int(self.entry_dict[f'{line}_entry'].get())) < 0:
-                    messagebox.showinfo(title="Error", message="All role entries must contain valid integers.")
+                entry = self.entry_dict[f'{line}_entry'].get()
+                entry_value = int(entry)
+
+                if entry_value < 0:
+                    messagebox.showinfo(title="Error",
+                                        message="All role entries must contain valid integers (greater than or equal "
+                                                "to 0).")
                     return
+                elif entry_value > 0:
+                    all_zero = False
+
         except ValueError:
             messagebox.showinfo(title="Error", message="All role entries must contain valid integers.")
+            return
+
+        if all_zero:
+            messagebox.showinfo(title="Error",
+                                message="All role entries are 0.\n\nPlease enter at least one role entry greater than "
+                                        "0.")
             return
 
         shift = self.dropdown_widget.get()
@@ -145,7 +161,10 @@ class DisplayManager:
         scheduled_associates = get_scheduled_associates(self.site, shift, date)
 
         if not scheduled_associates:  # if returned None due to a problem
-            messagebox.showinfo(title='Timeout', message='There was a problem, please try again.')
+            messagebox.showinfo(title='Timeout', message='There was a problem.\nIs your PIN correct?\nIs your '
+                                                         'security key correct?\nIs your site ID correct?\nIs your '
+                                                         'shift time correct?\nIf yes, SSPOT may have bugged '
+                                                         'out.\nPlease try again.')
             DisplayManager()
             return
 
