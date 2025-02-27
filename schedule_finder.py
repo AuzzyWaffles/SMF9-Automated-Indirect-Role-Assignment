@@ -1,25 +1,19 @@
+import os
+import time
+from tkinter import simpledialog
+from urllib3.exceptions import ProtocolError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-import time
-import sys
-import os
-import asyncio
-from selenium.common.exceptions import WebDriverException
-from selenium.common.exceptions import InvalidSessionIdException
-from tkinter import messagebox
+from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, StaleElementReferenceException
 
 
-async def my_function(webdriver):
-    # If the browser title is available after 20 seconds then there's a problem, close it
-    await asyncio.sleep(20)
-    try:
-        webdriver.title
-        webdriver.close()
-    except WebDriverException:
-        pass
+def midway_pin():
+    pin = simpledialog.askstring('Midway PIN', 'Please enter your Midway PIN:', show='*')
+    if pin:
+        return pin
 
 
 def get_scheduled_associates(site, shift, date):
@@ -34,20 +28,30 @@ def get_scheduled_associates(site, shift, date):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_experimental_option("detach", True)
     chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(options=chrome_options)
 
-    timeout = sys.maxsize
-    wait = WebDriverWait(driver, timeout)
+    wait = WebDriverWait(driver, timeout=10)
 
     try:
-        # Go to Scheduling Site
         driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
 
-        # Wait for the site to load in while user logs in through Midway authentication
-        wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
+        # Wait for Midway to load first
+        wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="user_name"]')))
 
-        # Start timing how long the browser is open for
-        asyncio.run(my_function(driver))
+        # Enter username based on OS Login
+        driver.find_element(By.XPATH, '//*[@id="user_name"]').send_keys(os.getlogin())
+
+        pin = simpledialog.askstring('Midway PIN', 'Please enter your Midway PIN:', show='*')
+        driver.find_element(By.XPATH, '//*[@id="password"]').send_keys(pin)
+
+        # Enter One-Time Password via Security Key
+        otp = simpledialog.askstring("Security Key", "Please Press your Security Key.", show='*')
+        driver.find_element(By.XPATH, '//*[@id="otp"]').send_keys(otp)
+        driver.find_element(By.XPATH, '//*[@id="verify_btn"]').click()
+
+        # Wait for SSPOT to load
+        wait.until(ec.visibility_of_element_located((By.XPATH, '/html/body/div/div/nav/a/img')))
 
         # Enter the date that was entered by the user, have to do it twice
         wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="date-picker"]')))
@@ -70,10 +74,8 @@ def get_scheduled_associates(site, shift, date):
             ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
         driver.find_element(By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}').click()
 
-        # Scroll to the top of the screen
         driver.execute_script("window.scrollTo(0, 0);")
 
-        # Find, scroll, and click the 'Select display attribute' button
         wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
         attribute_button = driver.find_element(By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')
         driver.execute_script("arguments[0].scrollIntoView(true);", attribute_button)
@@ -92,7 +94,6 @@ def get_scheduled_associates(site, shift, date):
         driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[12]/input').click()
         driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox"]/div[13]/input').click()
 
-        # Click submit button
         driver.find_element(By.XPATH, '//*[@id="roster-details-multi-checkbox-modal-submit-button"]').click()
         time.sleep(1)
 
@@ -112,5 +113,5 @@ def get_scheduled_associates(site, shift, date):
 
         return logins
 
-    except InvalidSessionIdException:
+    except (TypeError, ProtocolError, InvalidSessionIdException, TimeoutException, StaleElementReferenceException):
         return None

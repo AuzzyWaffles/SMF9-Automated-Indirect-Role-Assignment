@@ -1,32 +1,39 @@
-import sys
 import os
+import sys
+
+current_user = os.getlogin()
+if getattr(sys, 'frozen', False):  # If app is running as .exe file
+    txt_temp_path = logo_bundle_dir = sys._MEIPASS
+    txt_base_path = f'C:\\Users\\{current_user}\\.config\\Koality Rotation\\'
+else:  # If app is running in Pycharm
+    txt_base_path = logo_bundle_dir = None
 
 
-class FilePath:
-    def __init__(self):
-        self.current_user = os.getlogin()
+def get_txt(filename):
+    """Gets filepath for specific role permissions depending on whether the app if frozen or running in a normal
+    Python environment"""
+    if txt_base_path:  # If app is running as .exe file
+        if not os.path.exists(txt_base_path):  # If base path isn't on user's PC, make it
+            os.makedirs(txt_base_path)
 
-    def get_persistent_storage_path(self, filename):
-        # If the application is frozen (running as a standalone executable)
-        if getattr(sys, 'frozen', False):
-            temp_path = sys._MEIPASS
-            temp_path = os.path.join(temp_path, 'txt\\', filename)
-            base_path = f'C:\\Users\\{self.current_user}\\.config\\Koality Rotation\\'
+        if not os.path.exists(txt_base_path + filename):  # If file doesn't exist within base path on user's PC, make it
+            with open(f'{txt_base_path}{filename}', 'w') as file:
+                with open(txt_temp_path) as file2:
+                    text = file2.read()
+                file.write(text)
 
-            # If base path isn't on user's PC, make it
-            if not os.path.exists(base_path):
-                os.makedirs(base_path)
+        return os.path.join(txt_base_path, filename)
 
-            # If .txt file doesn't exist within base path on user's PC, make it
-            if not os.path.exists(base_path + filename):
-                with open(f'{base_path}{filename}', 'w') as file:
-                    with open(temp_path) as file2:
-                        text = file2.read()
-                    file.write(text)
+    else:  # If app is running in Pycharm
+        temp_txt_base_path = os.path.dirname(__file__)
+        return os.path.join(temp_txt_base_path, 'txt', filename)
 
-            return os.path.join(base_path, filename)
 
-        else:
-            # If running in a normal Python environment
-            base_path = os.path.dirname(__file__)
-            return os.path.join(base_path, 'txt', filename)
+def get_logo():
+    """Gets filepath for Amazon Smile Logo depending on whether the app is frozen or running in a normal Python
+    Environment"""
+    global logo_bundle_dir
+    if not logo_bundle_dir:
+        logo_bundle_dir = os.path.dirname(os.path.abspath(__file__))  # If app is running in Pycharm
+    image_path = os.path.join(logo_bundle_dir, 'images', 'image1.png')
+    return image_path
