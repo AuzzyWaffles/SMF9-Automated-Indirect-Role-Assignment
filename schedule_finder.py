@@ -32,6 +32,7 @@ def get_scheduled_associates(site, shift, date):
     driver = webdriver.Chrome(options=chrome_options)
 
     wait = WebDriverWait(driver, timeout=10)
+    wait_long = WebDriverWait(driver, timeout=60)
 
     try:
         driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
@@ -76,7 +77,7 @@ def get_scheduled_associates(site, shift, date):
 
         driver.execute_script("window.scrollTo(0, 0);")
 
-        wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
+        wait_long.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
         attribute_button = driver.find_element(By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')
         driver.execute_script("arguments[0].scrollIntoView(true);", attribute_button)
         attribute_button.click()
