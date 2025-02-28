@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import file_path
 from assignment_manager import AssignmentManager
-from permissions_manager import PermissionsManager
+import permissions_manager as pm
 from schedule_finder import get_scheduled_associates
 from customization_manager import change_site, change_shifts, add_remove_roles
 
@@ -26,6 +26,7 @@ class DisplayManager:
         self.window = tk.Tk()
         self.window.title('Koality Rotator')
         self.window.iconbitmap(file_path.get_koala())
+        self.center_window(self.window, 500, 600)
 
         self.text_window = None
         self.lines = None
@@ -60,13 +61,11 @@ class DisplayManager:
         style = ttk.Style()
         style.configure('TButton', padding=(0, 35, 0, 32), font=('Helvetica', 10))
 
-        self.pm = PermissionsManager()
-
         self.change_site_button = tk.Button(text="Change Site", width=10, command=lambda: change_site(self))
         self.change_shifts_button = tk.Button(text='Change Shifts', width=10, command=lambda: change_shifts(self))
         self.generate_button = ttk.Button(text="Generate", width=35, command=self.generate_button_click)
         self.permissions_button = ttk.Button(text="Check/Edit Permissions", width=35,
-                                             command=self.pm.check_permissions)
+                                             command=lambda: pm.check_permissions(self))
         self.add_remove_button = tk.Button(text='Add/Remove Roles',
                                            command=lambda: add_remove_roles(self))
 
@@ -82,6 +81,21 @@ class DisplayManager:
         self.canvas.create_image(250, 285, image=self.smile_image1, tag='image1')
 
         self.generate_roles()
+
+    def center_window(self, window, width, height):
+        # Get the screen's width and height
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+
+        # Get the window's size after packing the Text widget
+        window.update_idletasks()  # Ensure the window size is calculated
+
+        # Calculate the x and y coordinates to center the window
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+
+        # Set the window's geometry (size + position)
+        window.geometry(f'{width}x{height}+{x}+{y - 40}')
 
     def on_frame_configure(self):
         """Update the scrollable region of the canvas whenever the content changes"""
@@ -167,7 +181,7 @@ class DisplayManager:
             DisplayManager()
             return
 
-        permissions_dict = self.pm.get_permissions()
+        permissions_dict = pm.get_permissions()
 
         am = AssignmentManager(permissions_dict, nums_dict, scheduled_associates)
         result_string, not_enough_string = am.assign_indirects()

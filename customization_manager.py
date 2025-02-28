@@ -25,6 +25,8 @@ def change_shifts(display):
         text = file.read()
         shifts += text
         display.text_window = tk.Tk()
+        display.width = 500
+        display.length = 600
         display.text_window.title('Change Shifts')
         display.text_window.iconbitmap(file_path.get_koala())
         text = tk.Text(display.text_window)
@@ -42,6 +44,7 @@ def change_shifts(display):
         text.config(yscrollcommand=scrollbar.set)
 
         text.pack()
+        display.center_window(display.text_window, 630, 300)
         display.text_window.mainloop()
 
 
@@ -70,6 +73,7 @@ def add_remove_roles(display):
     text.config(yscrollcommand=scrollbar.set)
 
     text.pack()
+    display.center_window(display.text_window, 630, 300)
     display.text_window.mainloop()
 
 
