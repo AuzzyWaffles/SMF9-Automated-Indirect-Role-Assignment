@@ -3,47 +3,65 @@ import sys
 
 current_user = os.getlogin()
 if getattr(sys, 'frozen', False):  # If app is running as .exe file
-    txt_temp_path = logo_bundle_dir = koala_bundle_dir = sys._MEIPASS
-    txt_base_path = f'C:\\Users\\{current_user}\\.config\\Koality Rotator\\'
+    temp_path = sys._MEIPASS
+    base_path = f'C:\\Users\\{current_user}\\.config\\Koality Rotator'
 else:  # If app is running in Pycharm
-    txt_base_path = logo_bundle_dir = koala_bundle_dir = None
+    temp_path = None
+    base_path = os.path.dirname(__file__)
 
 
-def get_txt(filename):
-    """Gets filepath for specific role permissions depending on whether the app if frozen or running in a normal
-    Python environment"""
-    if txt_base_path:  # If app is running as .exe file
-        if not os.path.exists(txt_base_path):  # If base path isn't on user's PC, make it
-            os.makedirs(txt_base_path)
+def app_init():
+    """Gets filepath for specific role permissions depending on whether the app is frozen or running in a normal
+        Python environment"""
+    if temp_path:  # Execute function only if app is running as .exe file
+        if not os.path.exists(base_path):  # If base path isn't on user's PC, make it
+            os.makedirs(base_path)
 
-        if not os.path.exists(txt_base_path + filename):  # If file doesn't exist within base path on user's PC, make it
-            with open(f'{txt_base_path}{filename}', 'w') as file:
-                with open(txt_temp_path) as file2:
-                    text = file2.read()
-                file.write(text)
+        files = ['End of Line.txt', 'Problem Solve.txt', 'Waterspider.txt', 'Refurb.txt', 'Unload.txt', 'Detrash.txt',
+                 'saved_roles.txt', 'saved_shifts.txt', 'site.txt']
+        file_path = os.path.join(base_path, 'txt')
 
-        return os.path.join(txt_base_path, filename)
+        for filename in files:
+            full_path = os.path.join(file_path, filename)
+            full_temp_path = os.path.join(temp_path, 'txt', filename)
 
-    else:  # If app is running in Pycharm
-        temp_txt_base_path = os.path.dirname(__file__)
-        return os.path.join(temp_txt_base_path, 'txt', filename)
+            if not os.path.exists(full_path):  # If file doesn't exist in base path on PC
+                with open(full_path, 'w') as file:
+                    with open(os.path.join(full_temp_path)) as file2:
+                        text = file2.read()
+                    file.write(text)
+
+
+def get_permissions(role):
+    """Gets filepath for specific role permissions. Creates it if it doesn't exist."""
+    file_path = os.path.join(base_path, 'txt', f'{role}.txt')
+    if not os.path.exists(file_path):  # If file doesn't exist in base path on PC
+        with open(file_path, 'w') as file:
+            file.write(f'## {role} Permissions\nEnter Logins Here\n\n')
+    return file_path
+
+
+def get_custom_text(file):
+    """Gets filepath for custom files such as saved_roles, saved_shifts, or site ID."""
+    file_path = os.path.join(base_path, 'txt', f'{file}.txt')
+    return file_path
 
 
 def get_logo():
     """Gets filepath for Amazon Smile Logo depending on whether the app is frozen or running in a normal Python
     Environment"""
-    global logo_bundle_dir
-    if not logo_bundle_dir:
-        logo_bundle_dir = os.path.dirname(os.path.abspath(__file__))  # If app is running in Pycharm
-    image_path = os.path.join(logo_bundle_dir, 'images', 'image1.png')
-    return image_path
+    if temp_path:
+        logo_image_path = os.path.join(temp_path, 'images', 'image1.png')
+    else:
+        logo_image_path = os.path.join(base_path, 'images', 'image1.png')
+    return logo_image_path
 
 
 def get_koala():
     """Gets filepath for Amazon Koala Logo depending on whether the app is frozen or running in a normal Python
         Environment"""
-    global koala_bundle_dir
-    if not koala_bundle_dir:
-        koala_bundle_dir = os.path.dirname(os.path.abspath(__file__))  # If app is running in Pycharm
-    image_path = os.path.join(koala_bundle_dir, 'images', 'image2.ico')
-    return image_path
+    if temp_path:
+        koala_image_path = os.path.join(temp_path, 'images', 'image2.ico')
+    else:
+        koala_image_path = os.path.join(base_path, 'images', 'image2.ico')
+    return koala_image_path

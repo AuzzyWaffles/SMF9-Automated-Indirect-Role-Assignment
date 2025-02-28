@@ -5,7 +5,7 @@ import file_path
 
 class PermissionsManager:
     def __init__(self):
-        with open(file_path.get_txt(f'saved_roles.txt'), "r") as file:
+        with open(file_path.get_custom_text('saved_roles'), "r") as file:
             self.indirect_roles = [line.strip() for line in file.readlines()]
 
         self.window = None
@@ -14,14 +14,9 @@ class PermissionsManager:
         permissions_string = ""
 
         for role in self.indirect_roles:
-            try:
-                with open(file_path.get_txt(f'{role}.txt'), "r") as file:
-                    text = file.read()
-                    permissions_string += text
-            except FileNotFoundError:
-                with open(file_path.get_txt(f'{role.lower()}.txt'), "w") as file:
-                    file.write(f'## {role} Permissions\nEnter Logins Here\n\n')
-                    permissions_string += f'## {role} Permissions\nEnter Logins Here\n\n'
+            with open(file_path.get_permissions(role), "r") as file:
+                text = file.read()
+                permissions_string += text
 
         self.window = tk.Tk()
         self.window.title("Check/Edit Permissions")
@@ -58,7 +53,7 @@ class PermissionsManager:
 
             saved_permissions_iter = iter(saved_permissions[1:])
             for role in self.indirect_roles:
-                with open(file_path.get_txt(f'{role}.txt'), "w") as file:
+                with open(file_path.get_permissions(role), "w") as file:
                     file.write(next(saved_permissions_iter))
 
         self.window.destroy()
@@ -67,7 +62,7 @@ class PermissionsManager:
     def get_permissions(self):
         permissions_dict = {}
         for role in self.indirect_roles:
-            with open(file_path.get_txt(f'{role}.txt'), "r") as file:
+            with open(file_path.get_permissions(role), "r") as file:
                 text = file.read()
                 permissions_dict[role] = text.split("\n")
 

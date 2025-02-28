@@ -11,10 +11,10 @@ from customization_manager import change_site, change_shifts, add_remove_roles
 class DisplayManager:
     def __init__(self):
 
-        with open(file_path.get_txt('site.txt'), "r") as file:
+        with open(file_path.get_custom_text('site'), "r") as file:
             self.site = file.read().upper()
 
-        with open(file_path.get_txt('saved_shifts.txt'), 'r') as file:
+        with open(file_path.get_custom_text('saved_shifts'), 'r') as file:
             self.shifts = [shift[:-1] for shift in file.readlines()]
 
         self.current_time = dt.datetime.now()
@@ -94,7 +94,7 @@ class DisplayManager:
 
     def generate_roles(self):
         """Reads and creates text/entry for every saved role"""
-        with open(file_path.get_txt(f'saved_roles.txt'), "r") as file:
+        with open(file_path.get_custom_text('saved_roles'), "r") as file:
             self.lines = [line.strip() for line in file.readlines()]
             curr_y = 465
 
