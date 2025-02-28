@@ -3,10 +3,10 @@ import sys
 
 current_user = os.getlogin()
 if getattr(sys, 'frozen', False):  # If app is running as .exe file
-    txt_temp_path = logo_bundle_dir = sys._MEIPASS
-    txt_base_path = f'C:\\Users\\{current_user}\\.config\\Koality Rotation\\'
+    txt_temp_path = logo_bundle_dir = koala_bundle_dir = sys._MEIPASS
+    txt_base_path = f'C:\\Users\\{current_user}\\.config\\Koality Rotator\\'
 else:  # If app is running in Pycharm
-    txt_base_path = logo_bundle_dir = None
+    txt_base_path = logo_bundle_dir = koala_bundle_dir = None
 
 
 def get_txt(filename):
@@ -36,4 +36,14 @@ def get_logo():
     if not logo_bundle_dir:
         logo_bundle_dir = os.path.dirname(os.path.abspath(__file__))  # If app is running in Pycharm
     image_path = os.path.join(logo_bundle_dir, 'images', 'image1.png')
+    return image_path
+
+
+def get_koala():
+    """Gets filepath for Amazon Koala Logo depending on whether the app is frozen or running in a normal Python
+        Environment"""
+    global koala_bundle_dir
+    if not koala_bundle_dir:
+        koala_bundle_dir = os.path.dirname(os.path.abspath(__file__))  # If app is running in Pycharm
+    image_path = os.path.join(koala_bundle_dir, 'images', 'image2.ico')
     return image_path

@@ -78,8 +78,7 @@ class DisplayManager:
 
         self.canvas.create_line(0, 445, 500, 445, fill="black", width=2)
 
-        image_path = file_path.get_logo()
-        self.smile_image1 = tk.PhotoImage(file=image_path)
+        self.smile_image1 = tk.PhotoImage(file=file_path.get_logo())
         self.canvas.create_image(250, 285, image=self.smile_image1, tag='image1')
 
         self.generate_roles()
