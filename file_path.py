@@ -16,10 +16,12 @@ def app_init():
     if temp_path:  # Execute function only if app is running as .exe file
         if not os.path.exists(base_path):  # If base path isn't on user's PC, make it
             os.makedirs(base_path)
+        file_path = os.path.join(base_path, 'txt')
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         files = ['End of Line.txt', 'Problem Solve.txt', 'Waterspider.txt', 'Refurb.txt', 'Unload.txt', 'Detrash.txt',
                  'saved_roles.txt', 'saved_shifts.txt', 'site.txt']
-        file_path = os.path.join(base_path, 'txt')
 
         for filename in files:
             full_path = os.path.join(file_path, filename)

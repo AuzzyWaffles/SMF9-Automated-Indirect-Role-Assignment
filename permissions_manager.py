@@ -20,7 +20,7 @@ class PermissionsManager:
 
         self.window = tk.Tk()
         self.window.title("Check/Edit Permissions")
-        self.window.iconbitmap('images/image2.ico')
+        self.window.iconbitmap(file_path.get_koala())
         text = tk.Text(self.window)
         text.insert(tk.END, chars=permissions_string)
 

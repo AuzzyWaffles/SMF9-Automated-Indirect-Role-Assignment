@@ -26,7 +26,7 @@ def change_shifts(display):
         shifts += text
         display.text_window = tk.Tk()
         display.text_window.title('Change Shifts')
-        display.text_window.iconbitmap('images/image2.ico')
+        display.text_window.iconbitmap(file_path.get_koala())
         text = tk.Text(display.text_window)
         text.insert(tk.END, chars=shifts)
 
@@ -54,7 +54,7 @@ def add_remove_roles(display):
 
     display.text_window = tk.Tk()
     display.text_window.title("Add/Remove Roles")
-    display.text_window.iconbitmap('images/image2.ico')
+    display.text_window.iconbitmap(file_path.get_koala())
     text = tk.Text(display.text_window)
     text.insert(tk.END, chars=roles)
 

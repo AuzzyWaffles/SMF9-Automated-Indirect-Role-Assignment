@@ -15,7 +15,7 @@ class AssignmentManager:
     def assign_indirects(self):
         while self.nums_list:
             key = random.choice(self.nums_list)
-            with open(file_path.get_txt(f'{key}.txt')) as file:
+            with open(file_path.get_custom_text(key)) as file:
                 trained_associates = file.read()
                 trained_associates = trained_associates.split('\n')
                 trained_associates.remove('')

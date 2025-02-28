@@ -25,7 +25,7 @@ class DisplayManager:
 
         self.window = tk.Tk()
         self.window.title('Koality Rotator')
-        self.window.iconbitmap('images/image2.ico')
+        self.window.iconbitmap(file_path.get_koala())
 
         self.text_window = None
         self.lines = None
