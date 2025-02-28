@@ -35,7 +35,7 @@ def get_scheduled_associates(site, shift, date):
     wait_long = WebDriverWait(driver, timeout=60)
 
     try:
-        driver.get(f'{os.getenv('SCHEDULING_SITE')}{site}/schedule-timeline')
+        driver.get(f'https://sspot.iad.corp.amazon.com/{site}/schedule-timeline')
 
         # Wait for Midway to load first
         wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="user_name"]')))
