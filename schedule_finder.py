@@ -1,6 +1,5 @@
 import os
 import time
-from tkinter import simpledialog
 from urllib3.exceptions import ProtocolError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,13 +9,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, StaleElementReferenceException
 
 
-def midway_pin():
-    pin = simpledialog.askstring('Midway PIN', 'Please enter your Midway PIN:', show='*')
-    if pin:
-        return pin
-
-
-def get_scheduled_associates(site, shift, date):
+def get_scheduled_associates(display, shift, date):
     year = date.strftime('%Y')
     day_of_week = date.strftime('%a')
     month_num = date.month
@@ -35,7 +28,7 @@ def get_scheduled_associates(site, shift, date):
     wait_long = WebDriverWait(driver, timeout=60)
 
     try:
-        driver.get(f'https://sspot.iad.corp.amazon.com/{site}/schedule-timeline')
+        driver.get(f'https://sspot.iad.corp.amazon.com/{display.site}/schedule-timeline')
 
         # Wait for Midway to load first
         wait.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="user_name"]')))
@@ -43,11 +36,11 @@ def get_scheduled_associates(site, shift, date):
         # Enter username based on OS Login
         driver.find_element(By.XPATH, '//*[@id="user_name"]').send_keys(os.getlogin())
 
-        pin = simpledialog.askstring('Midway PIN', 'Please enter your Midway PIN:', show='*')
+        pin = display.midway_pin()
         driver.find_element(By.XPATH, '//*[@id="password"]').send_keys(pin)
 
         # Enter One-Time Password via Security Key
-        otp = simpledialog.askstring('Security Key', "Please Press your Security Key.", show='*')
+        otp = display.security_key()
         driver.find_element(By.XPATH, '//*[@id="otp"]').send_keys(otp)
         driver.find_element(By.XPATH, '//*[@id="verify_btn"]').click()
 

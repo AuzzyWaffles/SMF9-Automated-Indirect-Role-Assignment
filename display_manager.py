@@ -21,12 +21,12 @@ class DisplayManager:
         self.window.iconbitmap(file_path.get_koala())
         self.center_window(self.window, 500, 600)
 
-        frame = tk.Frame(self.window)
-        frame.pack(fill='both', expand=True)
-        self.canvas = tk.Canvas(frame, width=500, height=600, bg='#1399FF')
+        self.frame = tk.Frame(self.window)
+        self.frame.pack(fill='both', expand=True)
+        self.canvas = tk.Canvas(self.frame, width=500, height=600, bg='#1399FF')
         self.canvas.create_text(260, 60, text='Koality Rotator', font=('Helvetica', 20, 'bold'))
 
-        scrollbar = tk.Scrollbar(frame, orient='vertical', command=self.canvas.yview)
+        scrollbar = tk.Scrollbar(self.frame, orient='vertical', command=self.canvas.yview)
         scrollbar.pack(side='right', fill='y')
         self.canvas.config(yscrollcommand=scrollbar.set)
         self.canvas.bind_all('<MouseWheel>', self.on_mouse_wheel)
@@ -46,8 +46,8 @@ class DisplayManager:
         self.date_entry.insert(0, string=f'{self.month}-{self.day_number}-{self.year}')
         self.canvas.create_window(250, 132, window=self.date_entry)
 
-        style = ttk.Style()
-        style.configure('TButton', padding=(0, 35, 0, 32), font=('Helvetica', 10))
+        self.style = ttk.Style()
+        self.style.configure('TButton', padding=(0, 35, 0, 32), font=('Helvetica', 10))
 
         self.change_site_button = tk.Button(text='Change Site', width=10, command=self.change_site)
         self.change_shifts_button = tk.Button(text='Change Shifts', width=10, command=self.change_shifts)
@@ -83,17 +83,6 @@ class DisplayManager:
         """Handle mouse wheel scrolling"""
         if event.delta:
             self.canvas.yview_scroll(int(-1 * (event.delta / 120)), 'units')
-
-    def center_window(self, window, width, height):
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-
-        window.update_idletasks()
-
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-
-        window.geometry(f'{width}x{height}+{x}+{y - 40}')
 
     def create_textbox(self, title, chars, save_file):
         self.text_window = tk.Tk()
@@ -230,7 +219,7 @@ class DisplayManager:
 
         self.window.destroy()
 
-        scheduled_associates = get_scheduled_associates(self.site, shift, date)
+        scheduled_associates = get_scheduled_associates(self, shift, date)
 
         if not scheduled_associates:  # if None returned due to a problem
             messagebox.showinfo(title='Timeout', message='There was a problem.\nIs your PIN correct?\nIs your '
@@ -251,3 +240,24 @@ class DisplayManager:
                                                                     'the Main Menu?'):
             return
         DisplayManager()
+
+    def midway_pin(self):
+        """Retrieves midway_pin via entry box"""
+        pin = simpledialog.askstring('Midway PIN', 'Please enter your Midway PIN:', show='*')
+        return pin
+
+    def security_key(self):
+        """Retrieves one-time password from user's security key via entry box"""
+        otp = simpledialog.askstring('Security Key', "Please Press your Security Key.", show='*')
+        return otp
+
+    def center_window(self, window, width, height):
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+
+        window.update_idletasks()
+
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+
+        window.geometry(f'{width}x{height}+{x}+{y - 40}')
