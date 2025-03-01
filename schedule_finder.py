@@ -26,8 +26,8 @@ def get_scheduled_associates(site, shift, date):
 
     # Setup webdriver
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_experimental_option("detach", True)
-    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_experimental_option('detach', True)
+    chrome_options.add_argument('--disable-notifications')
     chrome_options.add_argument('--headless')
     driver = webdriver.Chrome(options=chrome_options)
 
@@ -47,7 +47,7 @@ def get_scheduled_associates(site, shift, date):
         driver.find_element(By.XPATH, '//*[@id="password"]').send_keys(pin)
 
         # Enter One-Time Password via Security Key
-        otp = simpledialog.askstring("Security Key", "Please Press your Security Key.", show='*')
+        otp = simpledialog.askstring('Security Key', "Please Press your Security Key.", show='*')
         driver.find_element(By.XPATH, '//*[@id="otp"]').send_keys(otp)
         driver.find_element(By.XPATH, '//*[@id="verify_btn"]').click()
 
@@ -75,11 +75,11 @@ def get_scheduled_associates(site, shift, date):
             ec.visibility_of_element_located((By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}')))
         driver.find_element(By.ID, f'time-cell-{day_of_week}-{month}-{day_decimal}-{shift}').click()
 
-        driver.execute_script("window.scrollTo(0, 0);")
+        driver.execute_script('window.scrollTo(0, 0);')
 
         wait_long.until(ec.visibility_of_element_located((By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')))
         attribute_button = driver.find_element(By.XPATH, '//*[@id="loading-bar"]/div[1]/div[1]/button')
-        driver.execute_script("arguments[0].scrollIntoView(true);", attribute_button)
+        driver.execute_script('arguments[0].scrollIntoView(true);', attribute_button)
         attribute_button.click()
 
         # Uncheck boxes on attribute list
@@ -106,9 +106,6 @@ def get_scheduled_associates(site, shift, date):
                 logins.add(element.text)
             else:
                 break
-
-        if shift == '20-30-00' and (day_of_week == 'Thu' or day_of_week == 'Fri' or day_of_week == 'Sat'):
-            logins.add(os.getenv('EXCEPTION_AA'))
 
         driver.close()
 
