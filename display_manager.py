@@ -131,7 +131,7 @@ class DisplayManager:
     def change_site(self):
         try:
             self.site = simpledialog.askstring('Change Site', 'Please enter your site:').upper()
-            custom.save('site', self.site)
+            custom.save('site', [self.site])
             self.canvas.delete(self.site_text)
             self.site_text = self.canvas.create_text(435, 100, text=f'Site: {self.site}',
                                                      font=('Helvetica', 12, 'bold'))

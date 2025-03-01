@@ -4,8 +4,8 @@ import file_path
 def get_site():
     """Opens site.txt and returns site ID"""
     with open(file_path.get_custom_text('site'), "r") as file:
-        site = file.readlines()
-        return site[0]
+        site = file.read()
+        return site
 
 
 def get_shifts():
