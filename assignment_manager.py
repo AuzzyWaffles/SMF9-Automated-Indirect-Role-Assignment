@@ -4,7 +4,7 @@ import file_path
 
 def assign_indirects(nums_dict, scheduled_associates):
     """Assigns indirect roles based on user's inputs on main menu"""
-    nums_list = {key for key in nums_dict}
+    nums_list = list({key for key in nums_dict})
     result_string = not_enough_string = ''
     chosen_associates = set()
 
