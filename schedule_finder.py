@@ -6,7 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import (InvalidSessionIdException, TimeoutException,
+                                        StaleElementReferenceException, NoSuchElementException)
 
 
 def get_scheduled_associates(display, shift, date):
@@ -75,10 +76,10 @@ def get_scheduled_associates(display, shift, date):
         # Uncheck boxes on attribute list
         wait.until(
             ec.visibility_of_element_located((By.ID, 'roster-details-multi-checkbox')))
-        checkboxes = driver.find_elements(By.CSS_SELECTOR, '#roster-details-multi-checkbox div')
-        for i, element in enumerate(checkboxes):
-            if i != 1:
-                element.click()
+        checkboxes = driver.find_elements(By.CSS_SELECTOR, '#roster-details-multi-checkbox div input')
+        click = [0, 3, 5, 6, 7, 9, 10, 11, 12]
+        for num in click:
+            checkboxes[num].click()
 
         driver.find_element(By.ID, 'roster-details-multi-checkbox-modal-submit-button').click()
         time.sleep(1)
@@ -91,10 +92,11 @@ def get_scheduled_associates(display, shift, date):
                 logins.add(element.text)
             else:
                 break
-
         driver.close()
 
         return logins
 
-    except (TypeError, ProtocolError, InvalidSessionIdException, TimeoutException, StaleElementReferenceException):
+    except (TypeError, ProtocolError, InvalidSessionIdException, TimeoutException,
+            StaleElementReferenceException, NoSuchElementException):
+        driver.close()
         return None
