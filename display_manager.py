@@ -91,12 +91,13 @@ class DisplayManager:
         self.text_box = tk.Text(self.text_window)
         self.text_box.insert(tk.END, chars=chars)
 
-        if save_file:
-            save_button = ttk.Button(self.text_window, text='Save', width=20,
-                                     command=lambda: self.__save_textbox(save_file))
+        save_button = ttk.Button(self.text_window, text='Save', width=20, command=None)
+        if save_file == 'perms':
+            save_button.config(command=lambda: self.__save_permissions(self.text_box))
+        elif save_file == 'res':
+            save_button.config(text='Main Menu', command=self.__main_menu)
         else:
-            save_button = ttk.Button(self.text_window, text='Save', width=20,
-                                     command=lambda: self.__save_permissions(self.text_box))
+            save_button.config(command=lambda: self.__save_textbox(save_file))
 
         save_button.place(x=480, y=10)
 
@@ -159,9 +160,13 @@ class DisplayManager:
         self.window.destroy()
         DisplayManager()
 
+    def __main_menu(self):
+        self.text_window.destroy()
+        DisplayManager()
+
     def check_permissions(self):
         permissions_string = pm.check_permissions()
-        self.create_textbox('Check/Edit Permissions', permissions_string, None)
+        self.create_textbox('Check/Edit Permissions', permissions_string, 'perms')
 
     def __save_permissions(self, text):
         saved = pm.save_permissions(text)
@@ -236,10 +241,7 @@ class DisplayManager:
         else:
             final_string = result_string
 
-        if not messagebox.askyesno(title='Koality Results', message=f'{final_string}\n Would you like to go back to '
-                                                                    'the Main Menu?'):
-            return
-        DisplayManager()
+        self.create_textbox('Koality Results', final_string, 'res')
 
     def midway_pin(self):
         """Retrieves midway_pin via entry box"""
